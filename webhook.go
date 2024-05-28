@@ -39,6 +39,7 @@ func (w *Webhook) SetAvatar(avatarUrl string) *Webhook {
 func (w *Webhook) Send(message string) (WebhookResponse, error) {
 	webhook := *w
 	webhook.Content = message
+	webhook.Embeds = nil
 
 	return w.send(webhook)
 }
@@ -97,6 +98,9 @@ func (w *Webhook) send(webhook Webhook) (WebhookResponse, error) {
 		err = json.NewDecoder(resp.Body).Decode(&responseBody)
 		if err != nil {
 			return WebhookResponse{}, err
+		}
+		if responseBody.Message == "" {
+			return WebhookResponse{}, fmt.Errorf("unknown 400 error")
 		}
 		return WebhookResponse{}, fmt.Errorf(responseBody.Message)
 	case 401:
